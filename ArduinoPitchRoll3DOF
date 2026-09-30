@@ -1,0 +1,50 @@
+#include <Wire.h>
+#include <Adafruit_LSM6DSOX.h>
+
+Adafruit_LSM6DSOX imu;
+
+void setup() {
+
+  Serial.begin(115200);
+
+  while (!Serial);
+
+  if (!imu.begin_I2C()) {
+    Serial.println("IMU not found!");
+    while (1);
+  }
+
+  Serial.println("LSM6DSOX Ready");
+}
+
+void loop() {
+
+  sensors_event_t accel;
+  sensors_event_t gyro;
+  sensors_event_t temp;
+
+  imu.getEvent(&accel, &gyro, &temp);
+
+  // acceleration in m/s²
+  float ax = accel.acceleration.x;
+  float ay = accel.acceleration.y;
+  float az = accel.acceleration.z;
+
+  // Pitch and Roll from gravity vector
+  float roll =
+      atan2(ay, az) * 180.0 / PI;
+
+  float pitch =
+      atan2(
+          -ax,
+          sqrt(ay * ay + az * az)
+      ) * 180.0 / PI;
+
+  Serial.print("Pitch: ");
+  Serial.print(pitch);
+
+  Serial.print("  Roll: ");
+  Serial.println(roll);
+
+  delay(20);
+}
