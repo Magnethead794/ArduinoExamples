@@ -1,0 +1,47 @@
+float pitch = 0;
+float roll = 0;
+
+unsigned long lastTime = 0;
+
+void loop() {
+
+  sensors_event_t accel;
+  sensors_event_t gyro;
+  sensors_event_t temp;
+
+  imu.getEvent(&accel, &gyro, &temp);
+
+  unsigned long now = millis();
+
+  float dt = (now - lastTime) / 1000.0;
+
+  lastTime = now;
+
+  float ax = accel.acceleration.x;
+  float ay = accel.acceleration.y;
+  float az = accel.acceleration.z;
+
+  float gx = gyro.gyro.x;
+  float gy = gyro.gyro.y;
+
+  float pitchAccel =
+      atan2(-ax,
+      sqrt(ay * ay + az * az))
+      * 180.0 / PI;
+
+  float rollAccel =
+      atan2(ay, az)
+      * 180.0 / PI;
+
+  pitch += gy * 180.0 / PI * dt;
+  roll  += gx * 180.0 / PI * dt;
+
+  pitch = pitch * 0.98 + pitchAccel * 0.02;
+  roll  = roll  * 0.98 + rollAccel * 0.02;
+
+  Serial.print(pitch);
+  Serial.print(",");
+  Serial.println(roll);
+
+  delay(10);
+}
